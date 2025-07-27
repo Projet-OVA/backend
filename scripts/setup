@@ -1,0 +1,25 @@
+#!/bin/bash
+
+echo "🚀 Setting up OVA Api project.."
+
+# Install dependencies
+echo "📦 Installing dependencies..."
+npm install
+
+# Setup Git hooks
+echo "🔧 Setting up Git hooks..."
+chmod +x .githooks/*
+git config core.hooksPath .githooks
+
+# Copy environment file
+if [ ! -f .env ]; then
+    echo "📄 Creating .env file..."
+    cp .env.example .env
+    echo "⚠️  Please update .env with your configuration"
+fi
+
+# Start development services
+echo "🐳 Starting development services..."
+docker-compose -f dependencies/docker-compose.yml up -d
+
+echo "✅ Setup complete! Run 'npm run start:dev' to start the application."
