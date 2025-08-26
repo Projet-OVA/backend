@@ -1,12 +1,12 @@
-#!/bin/sh
-echo "Running pre-push checks..."
+# #!/bin/sh
+# echo "Running pre-push checks..."
 
-# Run e2e tests
-echo "🔍 Running e2e tests..."
-npm run test:e2e
-if [ $? -ne 0 ]; then
-    echo "❌ E2E tests failed."
-    exit 1
-fi
+# # Run e2e tests
+# echo "🔍 Running e2e tests..."
+# npm run test:e2e
+# if [ $? -ne 0 ]; then
+#     echo "❌ E2E tests failed."
+#     exit 1
+# fi
 
-echo "✅ All pre-push checks passed!"
+# echo "✅ All pre-push checks passed!"

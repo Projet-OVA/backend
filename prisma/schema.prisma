@@ -1,0 +1,277 @@
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum MediaType {
+  AUDIO
+  IMAGE
+  VIDEO
+}
+
+enum FileExtension {
+  pdf
+  pptx
+  mp4
+  mp3
+  webp
+  png
+}
+
+enum PublicationStatus {
+  PUBLISHED
+  DRAFT
+  ARCHIVED
+}
+
+enum PublicationType {
+  MEDIA
+  TEXT
+}
+
+enum CourseCategory {
+  ENVIRONNEMENT
+  DROIT_DU_CITOYEN
+  DEVOIR_DU_CITOYEN
+}
+
+enum UserRole {
+  ADMIN
+  CITIZEN
+}
+
+// User model (replaces Manager and Citizen)
+model User {
+  id          String   @id @default(cuid())
+  nom         String
+  prenom      String
+  username    String   @unique
+  email       String   @unique
+  password    String
+  phoneNumber String?
+  role        UserRole @default(CITIZEN)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  publications    Publication[]
+  courses        Course[]
+  courseProgress CourseProgress[]
+  certificates   Certificate[]
+  communities    CommunityMember[]
+  communityLeads Community[]
+  events        Event[]
+  badges        Badge[]
+
+  @@map("users")
+}
+
+// Question model
+model Question {
+  id       String @id @default(cuid())
+  content  String
+  quizId   String
+  quiz     Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  responses Response[]
+
+  @@map("questions")
+}
+
+// Response model
+model Response {
+  id         String   @id @default(cuid())
+  content    String
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  isCorrect  Boolean  @default(false)
+
+  @@map("responses")
+}
+
+// Step model
+model Step {
+  id          String @id @default(cuid())
+  name        String
+  stepNumber  Int
+  courseId    String
+  course      Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  quizzes     Quiz[]
+
+  @@map("steps")
+}
+
+// Quiz model
+model Quiz {
+  id          String     @id @default(cuid())
+  nom         String
+  description String
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  score       Int
+  stepId      String
+  step        Step       @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  questions   Question[]
+
+  @@map("quizzes")
+}
+
+// Course model
+model Course {
+  id          String         @id @default(cuid())
+  nom         String
+  description String
+  category    CourseCategory
+  creatorId   String
+  creator     User           @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  quizzes     Quiz[]
+  steps       Step[]
+  progress    CourseProgress[]
+  certificates Certificate[]
+  attachments CourseAttachment[] // New relation with Attachment
+
+  @@map("courses")
+}
+
+// CourseProgress model
+model CourseProgress {
+  id        String   @id @default(cuid())
+  percentage Float
+  startDate DateTime @default(now())
+  endDate   DateTime?
+  userId    String
+  courseId  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  certificate Certificate?
+
+  @@unique([userId, courseId])
+  @@map("course_progress")
+}
+
+// Certificate model
+model Certificate {
+  id         String         @id @default(cuid())
+  name       String
+  issueDate  DateTime       @default(now())
+  issuer     String
+  userId     String
+  courseId   String
+  progressId String         @unique
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress   CourseProgress @relation(fields: [progressId], references: [id], onDelete: Cascade)
+
+  @@map("certificates")
+}
+
+// Attachment model
+model Attachment {
+  id         String       @id @default(cuid())
+  name       String
+  url        String
+  extension  FileExtension
+  mediaType  MediaType
+  publications PublicationAttachment[]
+  courses    CourseAttachment[] // New relation with Course
+
+  @@map("attachments")
+}
+
+// Publication model
+model Publication {
+  id                 String            @id @default(cuid())
+  publicationDate    DateTime          @default(now())
+  publicationContent String
+  status             PublicationStatus @default(DRAFT)
+  publicationType    PublicationType
+  authorId           String
+  author             User              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  attachments        PublicationAttachment[]
+
+  @@map("publications")
+}
+
+// Junction table for Publication-Attachment many-to-many
+model PublicationAttachment {
+  id             String      @id @default(cuid())
+  publicationId  String
+  attachmentId   String
+  publication    Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  attachment     Attachment  @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
+
+  @@unique([publicationId, attachmentId])
+  @@map("publication_attachments")
+}
+
+// Junction table for Course-Attachment many-to-many
+model CourseAttachment {
+  id           String     @id @default(cuid())
+  courseId     String
+  attachmentId String
+  course       Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  attachment   Attachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, attachmentId])
+  @@map("course_attachments")
+}
+
+// Community model
+model Community {
+  id            String   @id @default(cuid())
+  communityName String
+  creationDate  DateTime @default(now())
+  creatorId     String
+  creator       User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  members       CommunityMember[]
+  events        Event[]
+  badges        Badge[]
+
+  @@map("communities")
+}
+
+// Junction table for Community-User many-to-many
+model CommunityMember {
+  id          String    @id @default(cuid())
+  communityId String
+  userId      String
+  joinedAt    DateTime  @default(now())
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([communityId, userId])
+  @@map("community_members")
+}
+
+// Event model
+model Event {
+  id          String    @id @default(cuid())
+  eventName   String
+  eventDate   DateTime
+  organizerId String
+  communityId String
+  organizer   User      @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  community   Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@map("events")
+}
+
+// Badge model
+model Badge {
+  id         String    @id @default(cuid())
+  name       String
+  issueDate  DateTime  @default(now())
+  issuer     String
+  userId     String
+  communityId String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  community  Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@map("badges")
+}

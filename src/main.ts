@@ -1,8 +1,8 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
-import { SwaggerConfig } from "./core/config/swagger/swagger.config";
 import { CorsConfig } from "./core/config/cors/cors.config";
+import { SwaggerConfig } from "./core/config/swagger/swagger.config";
 import { json, urlencoded } from "express";
 import * as dotenv from "dotenv";
 dotenv.config();
@@ -36,4 +36,5 @@ async function bootstrap() {
   await app.listen(port, "0.0.0.0");
   console.log(`Application is running on port ${port}`);
 }
-bootstrap();
+
+void bootstrap();

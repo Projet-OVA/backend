@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: sira_ova_db
+    environment:
+      POSTGRES_DB: sira_ova
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sira_ova_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sira_ova_backend
+    environment:
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/sira_ova
+      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
+      PORT: 3000
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - sira_ova_network
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  # Frontend service (à implémenter)
+  # frontend:
+  #   build:
+  #     context: ../frontend
+  #     dockerfile: Dockerfile
+  #   container_name: sira_ova_frontend
+  #   ports:
+  #     - "3001:3001"
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - sira_ova_network
+
+volumes:
+  postgres_data:
+
+networks:
+  sira_ova_network:
+    driver: bridge
+
+
+
+
+
+
+
