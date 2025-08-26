@@ -1,31 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-// Interface simple pour éviter les références circulaires
-interface IUserData {
-  id: string;
-  nom: string;
-  prenom: string;
-  email: string;
-  username: string;
-  phoneNumber?: string;
-  role: string;
-  createdAt: Date;
-}
-
-interface IAuthData {
-  user: IUserData;
-  accessToken: string;
-}
-
-export class UserResponseDto implements IUserData {
+export class UserResponseDto {
   @ApiProperty({
-    description: "ID de l'utilisateur",
+    description: "Identifiant unique de l'utilisateur",
     example: "clx1234567890abcdef",
   })
   id: string;
 
   @ApiProperty({
-    description: "Nom de l'utilisateur",
+    description: "Nom de famille de l'utilisateur",
     example: "Diop",
   })
   nom: string;
@@ -37,80 +20,70 @@ export class UserResponseDto implements IUserData {
   prenom: string;
 
   @ApiProperty({
-    description: "Email de l'utilisateur",
+    description: "Adresse email de l'utilisateur",
     example: "amadou.diop@example.com",
   })
   email: string;
 
   @ApiProperty({
-    description: "Nom d'utilisateur",
+    description: "Nom d'utilisateur unique",
     example: "admin.diop",
   })
   username: string;
 
   @ApiProperty({
-    description: "Numéro de téléphone",
+    description: "Numéro de téléphone de l'utilisateur",
     example: "+221701234567",
     required: false,
   })
   phoneNumber?: string;
 
   @ApiProperty({
-    description: "Rôle de l'utilisateur",
+    description: "Rôle de l'utilisateur dans le système",
     example: "ADMIN",
     enum: ["ADMIN", "CITIZEN"],
   })
   role: string;
 
   @ApiProperty({
-    description: "Date de création",
+    description: "Date de création du compte utilisateur",
     example: "2024-01-01T10:00:00.000Z",
+    type: String,
+    format: "date-time",
   })
   createdAt: Date;
 }
 
+export class AuthDataDto {
+  @ApiProperty({
+    description: "Informations détaillées de l'utilisateur",
+    type: () => UserResponseDto,
+  })
+  user: UserResponseDto;
+
+  @ApiProperty({
+    description: "Token d'accès JWT pour l'authentification",
+    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  })
+  accessToken: string;
+}
+
 export class AuthResponseDto {
   @ApiProperty({
-    description: "Message de réponse",
+    description: "Message descriptif de la réponse",
     example: "Utilisateur connecté avec succès",
   })
   message: string;
 
   @ApiProperty({
-    description: "Données d'authentification",
-    type: "object",
-    properties: {
-      user: {
-        type: "object",
-        properties: {
-          id: { type: "string", example: "clx1234567890abcdef" },
-          nom: { type: "string", example: "Diop" },
-          prenom: { type: "string", example: "Amadou" },
-          email: { type: "string", example: "amadou.diop@example.com" },
-          username: { type: "string", example: "admin.diop" },
-          phoneNumber: { type: "string", example: "+221701234567" },
-          role: {
-            type: "string",
-            example: "ADMIN",
-            enum: ["ADMIN", "CITIZEN"],
-          },
-          createdAt: {
-            type: "string",
-            format: "date-time",
-            example: "2024-01-01T10:00:00.000Z",
-          },
-        },
-      },
-      accessToken: {
-        type: "string",
-        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-      },
-    },
+    description:
+      "Données d'authentification incluant l'utilisateur et le token",
+    type: () => AuthDataDto,
   })
-  data: IAuthData;
+  data: AuthDataDto;
 
   @ApiProperty({
-    description: "Code de statut HTTP",
+    description: "Code de statut HTTP de la réponse",
     example: 200,
   })
   statusCode: number;
@@ -118,33 +91,19 @@ export class AuthResponseDto {
 
 export class RegisterResponseDto {
   @ApiProperty({
-    description: "Message de réponse",
+    description: "Message de confirmation de l'inscription",
     example: "Utilisateur créé avec succès",
   })
   message: string;
 
   @ApiProperty({
-    description: "Données de l'utilisateur créé",
-    type: "object",
-    properties: {
-      id: { type: "string", example: "clx1234567890abcdef" },
-      nom: { type: "string", example: "Diop" },
-      prenom: { type: "string", example: "Amadou" },
-      email: { type: "string", example: "amadou.diop@example.com" },
-      username: { type: "string", example: "admin.diop" },
-      phoneNumber: { type: "string", example: "+221701234567" },
-      role: { type: "string", example: "ADMIN", enum: ["ADMIN", "CITIZEN"] },
-      createdAt: {
-        type: "string",
-        format: "date-time",
-        example: "2024-01-01T10:00:00.000Z",
-      },
-    },
+    description: "Données de l'utilisateur nouvellement créé",
+    type: () => UserResponseDto,
   })
-  data: IUserData;
+  data: UserResponseDto;
 
   @ApiProperty({
-    description: "Code de statut HTTP",
+    description: "Code de statut HTTP de la réponse",
     example: 201,
   })
   statusCode: number;
@@ -152,19 +111,21 @@ export class RegisterResponseDto {
 
 export class LogoutResponseDto {
   @ApiProperty({
-    description: "Message de réponse",
+    description: "Message de confirmation de la déconnexion",
     example: "Déconnexion réussie",
   })
   message: string;
 
   @ApiProperty({
-    description: "Données de réponse",
+    description: "Données de réponse (null pour la déconnexion)",
     example: null,
+    nullable: true,
+    type: "null",
   })
   data: null;
 
   @ApiProperty({
-    description: "Code de statut HTTP",
+    description: "Code de statut HTTP de la réponse",
     example: 200,
   })
   statusCode: number;

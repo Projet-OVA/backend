@@ -4,13 +4,13 @@ import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 export class SwaggerConfig {
   public static setup(app: INestApplication): void {
     const config = new DocumentBuilder()
-      .setTitle("Documentation API PassBi")
+      .setTitle("Documentation API SIRA")
       .setDescription(
         `
-        🚀 Documentation API complète de PassBi
+        🚀 Documentation API complète de SIRA
         
         ## Fonctionnalités principales
-        - Authentification par OTP
+        - Authentification
         - Gestion des utilisateurs
         - Upload de photos
         
@@ -21,19 +21,13 @@ export class SwaggerConfig {
       .setVersion("1.0")
       .setContact(
         "Équipe PassBi",
-        "https://impactsolution-passbiv1.onrender.com",
+        "http://localhost:5000",
         "support@passbi.com",
       )
-      .setLicense(
-        "Propriétaire",
-        "https://impactsolution-passbiv1.onrender.com",
-      )
+      .setLicense("Propriétaire", "http://localhost:5000")
       // .addServer('http://localhost:3000', 'Environnement Local')
-      .addServer(
-        "https://impactsolution-passbiv1.onrender.com",
-        "Environnement Local",
-      )
-      .addServer("https://impactsolution-passbiv1.onrender.com", "Production")
+      .addServer("http://localhost:5000", "Environnement Local")
+      .addServer("http://localhost:5000", "Production")
       .addTag("authUser", "Gestion de l'authentification des utilisateurs")
       .addTag("users", "Opérations liées aux utilisateurs")
       .addBearerAuth(

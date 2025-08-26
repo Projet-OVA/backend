@@ -1,5 +1,6 @@
 import {
   Injectable,
+  BadRequestException,
   ConflictException,
   UnauthorizedException,
   HttpStatus,
@@ -50,10 +51,16 @@ export class AuthUserService implements IAuthUserService {
   async register(registerDto: RegisterUserDto): Promise<RegisterResponseDto> {
     const { nom, prenom, email, username, password, phoneNumber } = registerDto;
 
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedUsername = username.trim().toLowerCase();
+
     // Vérifier si l'email ou le nom d'utilisateur existe déjà
     const existingUser = await this.prisma.user.findFirst({
       where: {
-        OR: [{ email }, { username }],
+        OR: [
+          { email: { equals: normalizedEmail, mode: "insensitive" } },
+          { username: { equals: normalizedUsername, mode: "insensitive" } },
+        ],
       },
     });
 
@@ -70,8 +77,8 @@ export class AuthUserService implements IAuthUserService {
         data: {
           nom,
           prenom,
-          email,
-          username,
+          email: normalizedEmail,
+          username: normalizedUsername,
           password: hashedPassword,
           phoneNumber,
         },
@@ -99,10 +106,19 @@ export class AuthUserService implements IAuthUserService {
   }
 
   async login(loginDto: LoginUserDto): Promise<AuthResponseDto> {
-    const { emailOrUsername, password } = loginDto;
+    // Utiliser la méthode helper pour obtenir l'identifiant
+    const identifier = loginDto.getLoginIdentifier();
+    const { password } = loginDto;
+
+    // Vérifier que l'identifiant existe
+    if (!identifier) {
+      throw new BadRequestException(
+        "Un email ou nom d'utilisateur est requis pour la connexion",
+      );
+    }
 
     // Valider l'utilisateur
-    const user = await this.validateUser(emailOrUsername, password);
+    const user = await this.validateUser(identifier, password);
 
     if (!user) {
       throw new UnauthorizedException(
@@ -143,7 +159,6 @@ export class AuthUserService implements IAuthUserService {
       statusCode: HttpStatus.OK,
     };
   }
-
   async logout(userId: string): Promise<LogoutResponseDto> {
     // Vérifier que l'utilisateur existe
     const user = (await this.prisma.user.findUnique({
@@ -153,9 +168,6 @@ export class AuthUserService implements IAuthUserService {
     if (!user) {
       throw new UnauthorizedException("Utilisateur non trouvé");
     }
-
-    // En production, vous pourriez ajouter le token à une liste noire
-    // ou implémenter une logique de déconnexion plus complexe
 
     return {
       message: "Déconnexion réussie",
@@ -168,10 +180,29 @@ export class AuthUserService implements IAuthUserService {
     emailOrUsername: string,
     password: string,
   ): Promise<UserCreateResult | null> {
-    // Rechercher l'utilisateur par email ou nom d'utilisateur
+    const identifier = (emailOrUsername ?? "").toString().trim();
+    if (!identifier) {
+      return null;
+    }
+
+    // Rechercher l'utilisateur par email ou nom d'utilisateur (insensible à la casse)
     const user = await this.prisma.user.findFirst({
       where: {
-        OR: [{ email: emailOrUsername }, { username: emailOrUsername }],
+        OR: [
+          { email: { equals: identifier, mode: "insensitive" } },
+          { username: { equals: identifier, mode: "insensitive" } },
+        ],
+      },
+      select: {
+        id: true,
+        nom: true,
+        prenom: true,
+        email: true,
+        username: true,
+        phoneNumber: true,
+        role: true,
+        createdAt: true,
+        password: true,
       },
     });
 
@@ -186,7 +217,9 @@ export class AuthUserService implements IAuthUserService {
       return null;
     }
 
-    return user as UserCreateResult;
+    // Retirer password du type retourné
+    const { password: _omit, ...safeUser } = user;
+    return safeUser as unknown as UserCreateResult;
   }
 
   generateJwtToken(payload: JwtPayload): string {

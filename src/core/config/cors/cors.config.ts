@@ -6,7 +6,7 @@ export class CorsConfig {
   public static getConfig(): CorsOptions {
     return {
       origin: [
-        "http://localhost:3000",
+        "http://localhost:5000",
         "https://localhost:3000",
         "https://impactsolution-passbi.onrender.com",
         "https://impactsolution-passbiv1.onrender.com", // Ajout de l'URL de déploiement
