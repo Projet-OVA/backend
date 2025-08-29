@@ -27,13 +27,15 @@ __decorate([
     (0, swagger_1.ApiProperty)({
         description: "Adresse email ou nom d'utilisateur pour la connexion",
         example: "dioufsoda@gmail.com",
-        required: false
+        required: false,
     }),
-    (0, class_validator_1.ValidateIf)((obj, value) => {
+    (0, class_validator_1.ValidateIf)((obj) => {
         return !obj.email && !obj.username;
     }),
     (0, class_validator_1.IsNotEmpty)({ message: "L'email ou le nom d'utilisateur est obligatoire" }),
-    (0, class_validator_1.IsString)({ message: "L'email ou le nom d'utilisateur doit être une chaîne de caractères" }),
+    (0, class_validator_1.IsString)({
+        message: "L'email ou le nom d'utilisateur doit être une chaîne de caractères",
+    }),
     (0, class_transformer_1.Transform)(({ value }) => {
         if (value === null || value === undefined)
             return undefined;
@@ -45,9 +47,9 @@ __decorate([
     (0, swagger_1.ApiProperty)({
         description: "Adresse email de l'utilisateur",
         example: "dioufsoda@gmail.com",
-        required: false
+        required: false,
     }),
-    (0, class_validator_1.ValidateIf)((obj, value) => {
+    (0, class_validator_1.ValidateIf)((obj) => {
         return !obj.emailOrUsername && !obj.username;
     }),
     (0, class_validator_1.IsNotEmpty)({ message: "L'email est obligatoire" }),
@@ -63,13 +65,15 @@ __decorate([
     (0, swagger_1.ApiProperty)({
         description: "Nom d'utilisateur",
         example: "Souada",
-        required: false
+        required: false,
     }),
-    (0, class_validator_1.ValidateIf)((obj, value) => {
+    (0, class_validator_1.ValidateIf)((obj) => {
         return !obj.emailOrUsername && !obj.email;
     }),
     (0, class_validator_1.IsNotEmpty)({ message: "Le nom d'utilisateur est obligatoire" }),
-    (0, class_validator_1.IsString)({ message: "Le nom d'utilisateur doit être une chaîne de caractères" }),
+    (0, class_validator_1.IsString)({
+        message: "Le nom d'utilisateur doit être une chaîne de caractères",
+    }),
     (0, class_transformer_1.Transform)(({ value }) => {
         if (value === null || value === undefined)
             return undefined;

@@ -6,14 +6,17 @@ export class LoginUserDto {
   @ApiProperty({
     description: "Adresse email ou nom d'utilisateur pour la connexion",
     example: "dioufsoda@gmail.com",
-    required: false
+    required: false,
   })
-  @ValidateIf((obj, value) => {
+  @ValidateIf((obj) => {
     // Valider seulement si aucun email/username n'est fourni
     return !obj.email && !obj.username;
   })
   @IsNotEmpty({ message: "L'email ou le nom d'utilisateur est obligatoire" })
-  @IsString({ message: "L'email ou le nom d'utilisateur doit être une chaîne de caractères" })
+  @IsString({
+    message:
+      "L'email ou le nom d'utilisateur doit être une chaîne de caractères",
+  })
   @Transform(({ value }) => {
     if (value === null || value === undefined) return undefined;
     return typeof value === "string" ? value.trim() : String(value).trim();
@@ -23,9 +26,9 @@ export class LoginUserDto {
   @ApiProperty({
     description: "Adresse email de l'utilisateur",
     example: "dioufsoda@gmail.com",
-    required: false
+    required: false,
   })
-  @ValidateIf((obj, value) => {
+  @ValidateIf((obj) => {
     // Valider seulement si ni emailOrUsername ni username ne sont fournis
     return !obj.emailOrUsername && !obj.username;
   })
@@ -40,14 +43,16 @@ export class LoginUserDto {
   @ApiProperty({
     description: "Nom d'utilisateur",
     example: "Souada",
-    required: false
+    required: false,
   })
-  @ValidateIf((obj, value) => {
+  @ValidateIf((obj) => {
     // Valider seulement si ni emailOrUsername ni email ne sont fournis
     return !obj.emailOrUsername && !obj.email;
   })
   @IsNotEmpty({ message: "Le nom d'utilisateur est obligatoire" })
-  @IsString({ message: "Le nom d'utilisateur doit être une chaîne de caractères" })
+  @IsString({
+    message: "Le nom d'utilisateur doit être une chaîne de caractères",
+  })
   @Transform(({ value }) => {
     if (value === null || value === undefined) return undefined;
     return typeof value === "string" ? value.trim() : String(value).trim();

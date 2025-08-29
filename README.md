@@ -192,3 +192,10 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 - [Prisma](https://www.prisma.io/) - ORM moderne
 - [GitHub Actions](https://github.com/features/actions) - CI/CD
 - [Render](https://render.com/) - Plateforme de déploiement
+
+
+<!-- verify ports en cours -->
+lsof -ti:5000
+netstat -tulpn | grep :5000
+kill -9 29706
+netstat -tulpn | grep :5000

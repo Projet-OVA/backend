@@ -30,7 +30,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
     }
     validate(payload) {
         return {
-            sub: payload.sub,
+            id: payload.sub,
             email: payload.email,
             username: payload.username,
             nom: payload.nom,
